@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'course',
+    'course.apps.CourseConfig',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 
 MIDDLEWARE = [
@@ -78,11 +80,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ecourse',
-        'USER': 'doadmin',
-        'PASSWORD': 'AVNS_ie4fjhiKfjJlB4nCLSj',
-        'HOST': 'db-mysql-sgp1-91967-do-user-11822828-0.b.db.ondigitalocean.com',
-        'PORT': '25060',
-        'SSLMODE': 'REQUIRED'
+        'USER': 'root',
+        'PASSWORD': '0937461321Huy@',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
@@ -123,7 +124,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_ROOT = "%s/courses/static/" % BASE_DIR
+MEDIA_ROOT = "%s/static/media/" % BASE_DIR
+MEDIA_URL = '/media/'
+
+CKEDITOR_UPLOAD_PATH = "ckeditor_lesson/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
