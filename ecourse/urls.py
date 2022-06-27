@@ -22,5 +22,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('course/', include('course.urls')),
+    path("o/", include('oauth2_provider.urls', namespace='oauth2_provider')),
     re_path(r'^ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
