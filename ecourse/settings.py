@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'oauth2_provider',
     'corsheaders',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+# CORS_ALLOWED_ORIGIN = []
 CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'ecourse.urls'
@@ -69,6 +71,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.media',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -129,7 +132,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 MEDIA_ROOT = "%s/static/media/" % BASE_DIR
 MEDIA_URL = '/media/'
 
@@ -146,6 +149,24 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': '2',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-    )
+    ),
 }
 
+OAUTH2_INFO = {
+    "client_id": "Kpfn69SqGXrPI6kGDHSD9H4Hx943vp5pAxQAGfYH",
+    "client_secret":"uvkHnHBvcOFLXGMuIX5rdis55jpV5rwKcegs6s6pcNjwpRYliIILZQ4OING0KKOFnm24qmMzPBk4T7hJk3JPuTATOX0UGvR0f3r3aR01RJzSb5OFDcMzHR0CnxkRTvNu"
+}
+
+OAUTH2_PROVIDER = {
+    'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore'
+}
+
+# debug_toolbar moved here. 
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    DEBUG_TOOLBAR_CONFIG = {
+        'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+        'EXTRA_SIGNALS': [],
+    }
+    
