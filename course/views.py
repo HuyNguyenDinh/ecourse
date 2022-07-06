@@ -1,3 +1,4 @@
+from xmlrpc.client import ResponseError
 from django import views
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -19,7 +20,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     serializer_class = UserSerializer
     parser_classes = [MultiPartParser, ]
     def get_permissions(self):
-        if self.action == "current_user" :
+        if self.action in ["current_user", "get_courses_of_user"]:
             return [permissions.IsAuthenticated(), ]
         else:
             return [permissions.AllowAny(), ]
@@ -27,6 +28,13 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     @action(methods=['get'], detail=False, url_path='current-user')
     def current_user(self, request):
         return Response(self.serializer_class(request.user).data, status=status.HTTP_200_OK)
+    
+    @action(methods=['get'], detail=True, url_path='courses')
+    def get_courses_of_user(self, request, pk):
+        courses = User.objects.get(pk=pk).students
+        if courses:
+            return Response(CourseSerializer(courses, many=True).data, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 class AuthInfo(views.APIView):
     def get(self, request):
@@ -73,6 +81,13 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         else:
             return Response(status=status.HTTP_202_ACCEPTED)
 
+    @action(methods=['get'], detail=True, url_path='students')
+    def get_students(self, request, pk):
+            students = Course.objects.get(pk=pk).students
+            if students:
+                return Response(UserSerializer(students, many=True).data, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
     @action(methods=['post'], detail=True, url_path='rating')
     def course_rating(self, request, pk):
         point = request.data.get("point")
@@ -95,7 +110,7 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     #         return Response(status=status.HTTP_404_NOT_FOUND)
     #     else:
     #         return Response(RatingSerializer(course_ratings, many=True).data, status=status.HTTP_200_OK)
-        
+   
 
     @action(methods=['get'], detail=True, url_path='view')
     def course_views(self, request, pk):
@@ -109,10 +124,10 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     def get_permissions(self):
         if self.action == "course_views":
             return [permissions.AllowAny(), ]
-        elif self.action == "create":
-            return [permissions.IsAdminUser(), ]
-        elif self.action == "update":
+        elif self.action in ["update", "get_students"]:
             return [MentorPermission(), ]
+        elif self.action == ["create"]:
+            return [permissions.IsAdminUser(), ]
         elif self.action in ["list", "retrieve", "course_rating"]:
             return [permissions.AllowAny(), ]
         else:

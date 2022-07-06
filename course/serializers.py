@@ -70,5 +70,4 @@ class CourseSerializer(ModelSerializer):
     ratings = RatingSerializer
     class Meta:
         model = Course
-        fields = ['id', 'subject', 'image', 'created_date', 'category', 'ratings', 'students', 'views']
-  
+        fields = ['id', 'subject', 'image', 'created_date', 'category', 'ratings', 'views']
