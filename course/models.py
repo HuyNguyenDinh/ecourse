@@ -28,55 +28,9 @@ class ItemBase(models.Model):
     def __str__(self):
         return self.subject
     
-class Course(ItemBase):
-
-    class Meta:
-        unique_together = ('subject', 'category')
-        ordering = ["-created_date"]
-    description = models.TextField(null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
-    students = models.ManyToManyField(User, related_name="students")
-    ratings = models.ManyToManyField(User, through='Rating', related_name='ratings')
-
-class Lesson(ItemBase):
-    content = RichTextField()
-    courses = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="lessons", unique=False)
-    tags = models.ManyToManyField('Tag', null=True, blank=True)
-    points = models.ManyToManyField(User, through='Point', related_name='points')
-    class Meta:
-        ordering = ["created_date"]
-        constraints = [
-            models.UniqueConstraint(
-                fields=['subject', 'courses'],
-                name='lesson_of_course'
-            )
-        ]
-    comments = models.ManyToManyField(User, through='Comment', related_name='comments')
-    actions = models.ManyToManyField(User, through="Action", related_name="actions")
-
-
-
-class Point(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True)
-    point = models.IntegerField(
-        validators=[
-            MaxValueValidator(10),
-            MinValueValidator(0)
-        ]
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'lesson'],
-                name='point_of_lesson_of_user'
-            )
-        ]
-
 class Rating(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     rating = models.IntegerField(
         validators=[
             MaxValueValidator(5),
@@ -91,15 +45,8 @@ class Rating(models.Model):
             )
         ]
 
-class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
 class ActionBase(models.Model):
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    lesson = models.ForeignKey('Lesson', on_delete=models.CASCADE)
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -133,4 +80,69 @@ class CourseView(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     view = models.IntegerField(default=0)
-    course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name="views")
+    course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name="views")
+
+class Course(ItemBase):
+
+    class Meta:
+        unique_together = ('subject', 'category')
+        ordering = ["-created_date"]
+    description = models.TextField(null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    students = models.ManyToManyField(User, related_name="students")
+    ratings = models.ManyToManyField(User, through='Rating', related_name='ratings')
+
+    @property
+    def average_rating(self):
+        return Rating.objects.filter(course=self).aggregate(models.Avg('rating')).get('rating__avg')
+
+class Lesson(ItemBase):
+    content = RichTextField()
+    courses = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="lessons", unique=False)
+    tags = models.ManyToManyField('Tag', null=True, blank=True)
+    points = models.ManyToManyField(User, through='Point', related_name='points')
+    class Meta:
+        ordering = ["created_date"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['subject', 'courses'],
+                name='lesson_of_course'
+            )
+        ]
+    comments = models.ManyToManyField(User, through='Comment', related_name='comments')
+    actions = models.ManyToManyField(User, through="Action", related_name="actions")
+
+    @property
+    def comment_count(self):
+        return Comment.objects.filter(lesson=self).aggregate(models.Count('id')).get("id__count")
+
+    @property
+    def action_count(self):
+        return Action.objects.filter(lesson=self).aggregate(models.Count('id')).get("id__count")
+
+
+class Point(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True, blank=True)
+    point = models.IntegerField(
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(0)
+        ]
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'lesson'],
+                name='point_of_lesson_of_user'
+            )
+        ]
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+

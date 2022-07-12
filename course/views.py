@@ -45,6 +45,7 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     queryset = Course.objects.filter(active=True)
     serializer_class = CourseSerializer
     pagination_class = BasePagination
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         courses = Course.objects.filter(active=True)
@@ -99,17 +100,17 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
             else:
                 return Response(RatingSerializer(r).data,status=status.HTTP_201_CREATED)
 
-    # @action(methods=['get'], detail=True, url_path='get-ratings')
-    # def get_course_rating(self, request, pk):
-    #     try:
-    #         course = self.get_object()
-    #         course_ratings = Rating.objects.filter(course=course)
-    #         if not course_ratings:
-    #             raise ValueError
-    #     except:
-    #         return Response(status=status.HTTP_404_NOT_FOUND)
-    #     else:
-    #         return Response(RatingSerializer(course_ratings, many=True).data, status=status.HTTP_200_OK)
+    @action(methods=['get'], detail=True, url_path='get-ratings')
+    def get_course_rating(self, request, pk):
+        try:
+            course = self.get_object()
+            course_ratings = Rating.objects.filter(course=course)
+            if not course_ratings:
+                raise ValueError
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(RatingSerializer(course_ratings, many=True).data, status=status.HTTP_200_OK)
    
 
     @action(methods=['get'], detail=True, url_path='view')
@@ -121,29 +122,30 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         v.refresh_from_db()
         return Response(CourseViewSerializer(v).data, status=status.HTTP_200_OK)
 
-    def get_permissions(self):
-        if self.action == "course_views":
-            return [permissions.AllowAny(), ]
-        elif self.action in ["update", "get_students"]:
-            return [MentorPermission(), ]
-        elif self.action == ["create"]:
-            return [permissions.IsAdminUser(), ]
-        elif self.action in ["list", "retrieve", "course_rating"]:
-            return [permissions.AllowAny(), ]
-        else:
-            return [permissions.IsAuthenticated(), ]
+    # def get_permissions(self):
+    #     if self.action == "course_views":
+    #         return [permissions.AllowAny(), ]
+    #     elif self.action in ["update", "get_students"]:
+    #         return [MentorPermission(), ]
+    #     elif self.action == ["create"]:
+    #         return [permissions.IsAdminUser(), ]
+    #     elif self.action in ["list", "retrieve", "course_rating"]:
+    #         return [permissions.AllowAny(), ]
+    #     else:
+    #         return [permissions.IsAuthenticated(), ]
 
 
 class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Lesson.objects.filter(active=True)
     serializer_class = LessonSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    pagination_class = BasePagination
 
-    def get_permissions(self):
-        if self.action in ["create", "update", "destroy"]:
-            return [MentorPermission(), ]
-        else:
-            return [permissions.IsAuthenticated(), ]
+    # def get_permissions(self):
+    #     if self.action in ["create", "update", "destroy"]:
+    #         return [MentorPermission(), ]
+    #     else:
+    #         return [permissions.IsAuthenticated(), ]
 
     @action(methods=['post'], detail=True, url_path="hide-lesson", url_name="hide-lesson")
     def hide_lesson(self, request, pk):
@@ -165,15 +167,15 @@ class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    # @action(methods=["get"], detail=True, url_path="get-comments", url_name="get-comments")
-    # def get_comments(self, request, pk):
-    #     try:
-    #         lesson = self.get_object()
-    #         c = Comment.objects.filter(lesson=lesson)
-    #     except:
-    #         return Response(status=status.HTTP_404_NOT_FOUND)
-    #     else:
-    #         return Response(CommentSerializer(c, many=True).data, status=status.HTTP_200_OK)
+    @action(methods=["get"], detail=True, url_path="get-comments", url_name="get-comments")
+    def get_comments(self, request, pk):
+        try:
+            lesson = self.get_object()
+            c = Comment.objects.filter(lesson=lesson)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(CommentSerializer(c, many=True).data, status=status.HTTP_200_OK)
     
     @action(methods=['post'], detail=True, url_path="like")
     def take_action(self, request, pk):
@@ -185,21 +187,22 @@ class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         else:
             return Response(ActionSerializer(action).data, status=status.HTTP_201_CREATED)
 
-    # @action(methods=["get"], detail=True, url_path="get-actions", url_name="get-actions")
-    # def get_actions(self, request, pk):
-    #     try:
-    #         lesson = self.get_object()
-    #         a = Action.objects.filter(lesson=lesson)
-    #     except:
-    #         return Response(status=status.HTTP_404_NOT_FOUND)
-    #     else:
-    #         return Response(ActionSerializer(a, many=True).data, status=status.HTTP_200_OK)
+    @action(methods=["get"], detail=True, url_path="get-actions", url_name="get-actions")
+    def get_actions(self, request, pk):
+        try:
+            lesson = self.get_object()
+            a = Action.objects.filter(lesson=lesson)
+        except:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(ActionSerializer(a, many=True).data, status=status.HTTP_200_OK)
 
 
 class CommentViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = BasePagination
 
     def partial_update(self, request, *args, **kwargs):
         if request.user == self.get_object().creator:
@@ -210,3 +213,9 @@ class CommentViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateA
         if request.user == self.get_object().creator:
             return super().destroy(request, *args, **kwargs)
         return Response(status=status.HTTP_403_FORBIDDEN)
+
+class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = BasePagination

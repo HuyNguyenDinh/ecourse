@@ -1,5 +1,4 @@
-from rest_framework.serializers import  ModelSerializer, SerializerMethodField, ImageField
-from django.conf import settings
+from rest_framework.serializers import  ModelSerializer, SerializerMethodField, ImageField, SerializerMethodField
 from .models import *
 
 class UserSerializer(ModelSerializer):
@@ -33,12 +32,10 @@ class CommentSerializer(ModelSerializer):
         fields = "__all__"
 
 class LessonSerializer(ModelSerializer):
-    action_set = ActionSerializer(many=True)
     tags = TagSerializer(many=True)
-    comment_set = CommentSerializer(many=True)
     class Meta:
         model = Lesson
-        fields = ["id", "subject", "content", "image", "created_date", "tags", "comment_set", "action_set"]
+        fields = ["id", "subject", "content", "image", "created_date", "updated_date", "tags", "comment_count", "action_count"]
 
 class PointSerializer(ModelSerializer):
     class Meta:
@@ -53,7 +50,7 @@ class LessonsCourseSerializer(LessonSerializer):
         return request.build_absolute_uri('/')[:-1] + obj.image.url
     class Meta:
         model = Lesson
-        fields = ["id", "subject", "content", "image", "created_date", "tags", "comment_set", "action_set"]
+        fields = ["id", "subject", "content", "image", "created_date", "updated_date", "tags", "comment_count", "action_count"]
 
 class CourseViewSerializer(ModelSerializer):
     class Meta:
@@ -67,7 +64,11 @@ class RatingSerializer(ModelSerializer):
 
 class CourseSerializer(ModelSerializer):
     views = CourseViewSerializer()
-    ratings = RatingSerializer
     class Meta:
         model = Course
-        fields = ['id', 'subject', 'image', 'created_date', 'category', 'ratings', 'views']
+        fields = ['id', 'subject', 'image', 'created_date', "updated_date", 'category', 'views', 'average_rating']
+
+class CategorySerializer(ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
