@@ -43,15 +43,6 @@ class PointSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class LessonsCourseSerializer(LessonSerializer):
-    image = SerializerMethodField()
-    def get_image(self, obj):
-        request = self.context['request']
-        return request.build_absolute_uri('/')[:-1] + obj.image.url
-    class Meta:
-        model = Lesson
-        fields = ["id", "subject", "content", "image", "created_date", "updated_date", "tags", "comment_count", "action_count"]
-
 class CourseViewSerializer(ModelSerializer):
     class Meta:
         model = CourseView

@@ -134,7 +134,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = "%s/static/media/" % BASE_DIR
-MEDIA_URL = '/media/'
+MEDIA_URL = 'http://localhost:8000/media/'
 
 CKEDITOR_UPLOAD_PATH = "ckeditor_lesson/"
 

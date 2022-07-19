@@ -68,7 +68,7 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         lessons = course.filter(active=True)
         if search:
             lessons = lessons.filter(subject__icontains=search)
-        return Response(LessonsCourseSerializer(lessons, context={'request': self.request}, many=True).data, status=status.HTTP_200_OK)
+        return Response(LessonSerializer(lessons, context={'request': self.request}, many=True).data, status=status.HTTP_200_OK)
 
     @action(methods=["post"], detail=True, url_path='register')
     def register_course(self, request, pk):
@@ -218,4 +218,4 @@ class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [permissions.AllowAny]
-    pagination_class = BasePagination
+    pagination_class = CategoryPagination
