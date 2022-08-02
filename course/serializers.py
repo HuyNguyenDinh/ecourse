@@ -1,4 +1,4 @@
-from rest_framework.serializers import  ModelSerializer, SerializerMethodField, ImageField, SerializerMethodField
+from rest_framework.serializers import  ModelSerializer
 from .models import *
 
 class UserSerializer(ModelSerializer):
@@ -15,6 +15,20 @@ class UserSerializer(ModelSerializer):
         user.save()
         return user
 
+class ResetPasswordSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "email"]
+        extra_kwargs = {
+            'id': {'read_only': 'true'},
+        }
+
+class TokenSerializer(ModelSerializer):
+    user = ResetPasswordSerializer
+    class Meta:
+        model = Token
+        fields = ["code", "user"]
+
 class TagSerializer(ModelSerializer):
 
     class Meta:
@@ -27,6 +41,7 @@ class ActionSerializer(ModelSerializer):
         fields = ["id", "type", "created_date"]
 
 class CommentSerializer(ModelSerializer):
+    creator = UserSerializer()
     class Meta:
         model = Comment
         fields = "__all__"

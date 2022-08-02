@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)ji9bk29v@&!e_kqe13mm+y_fja9_%6)y87answ7w^k+x-&n$0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'corsheaders',
     'drf_yasg',
+    'cloudinary',
 ]
 
 MIDDLEWARE = [
@@ -128,13 +132,28 @@ USE_I18N = True
 
 USE_TZ = True
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'ecourse.ou@gmail.com'
+EMAIL_HOST_PASSWORD = 'eqewoyjafzkfaaxe'
+EMAIL_PORT = 587
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = "%s/static/media/" % BASE_DIR
-MEDIA_URL = 'http://localhost:8000/media/'
+# MEDIA_URL = 'http://localhost:8000/media/'
+
+CLOUDINARY_STORAGE = {
+  'CLOUD_NAME': "open-university-dinhhuy", 
+  'API_KEY': "418839168168771", 
+  'API_SECRET': "xtmalq_fmZt2HHiBVumFdmdZzmI" 
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CKEDITOR_UPLOAD_PATH = "ckeditor_lesson/"
 

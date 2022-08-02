@@ -1,7 +1,7 @@
-from xmlrpc.client import ResponseError
+import hashlib
+
 from django import views
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.core.mail import send_mail
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from rest_framework import status, generics, views
@@ -12,12 +12,12 @@ from .serializers import *
 from .paginators import *
 from ecourse import settings
 from .perms import *
-from django.db.models import F
+from course.utils import random_for_confirm_code
+from django.utils import timezone
 
 # Create your views here.
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
-    serializer_class = UserSerializer
     parser_classes = [MultiPartParser, ]
     def get_permissions(self):
         if self.action in ["current_user", "get_courses_of_user"]:
@@ -35,6 +35,58 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
         if courses:
             return Response(CourseSerializer(courses, many=True).data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+    @action(methods=['post'], url_path='reset_password', detail=False)
+    def reset_password(self, request):
+        email = request.data.get('email')
+        if email:
+            user = User.objects.filter(email=email).first()
+            if user:
+                code = random_for_confirm_code()
+                Token.objects.update_or_create(user=user, defaults={
+                    'code': str(hashlib.sha256(str(code).encode('utf-8')).hexdigest()),
+                    'expired_date': timezone.now() + timezone.timedelta(minutes=30)
+                })
+                subject = "Xác nhận reset mật khẩu trên hệ thống Ecourse OU"
+                content = """
+                Chào {0}
+                Chúng tôi đã nhận yêu cầu reset mật khẩu cho tài khoản của bạn.
+                Mã xác nhận cho tài khoản của bạn là: {1}
+                Nếu xác nhận thì đây cũng chính là mật khẩu mới của bạn.
+                Mọi thắc mắc và yêu cầu hỗ trợ xin gửi về địa chỉ ecourse.ou@gmail.com.
+                                        """.format(user.username,code)
+                send_mail(subject, content, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+                return Response(data=ResetPasswordSerializer(user).data, status=status.HTTP_200_OK)
+            else:
+                return Response(data={"error_message":"User not found"},status = status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(status = status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['post'], detail=False, url_path='reset_password/confirm')
+    def confirm_reset_password(self, request):
+        user_id = request.data.get('user')
+        code = request.data.get('code')
+        if user_id:
+            user_id = int(user_id)
+            confirm_token = Token.objects.filter(user=user_id).first()
+            if confirm_token and code:
+                if confirm_token.code == str(hashlib.sha256(str(code).encode("utf-8")).hexdigest()):
+                    if confirm_token.expired_date > timezone.now():
+                        confirm_token.expired_date = timezone.now()
+                        confirm_token.save()
+                        return Response(data={"message": "Reset password code accepted"}, status=status.HTTP_202_ACCEPTED)
+                    return Response(data={"message": "Confirm code has expired, please get a new one"}, status=status.HTTP_408_REQUEST_TIMEOUT)
+                return Response(data={"message": "Confirm code was correct, please type again"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(data={"message": "Confirm code error, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(data={"message": "User was not valid"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def get_serializer_class(self):
+        if self.action == 'reset_password':
+            return ResetPasswordSerializer
+        elif self.action == 'confirm_reset_password':
+            return TokenSerializer
+        else:
+            return UserSerializer
 
 class AuthInfo(views.APIView):
     def get(self, request):

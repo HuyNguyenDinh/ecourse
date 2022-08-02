@@ -4,7 +4,6 @@ from django import forms
 from django.urls import path
 from django.db.models import Count
 from django.template.response import TemplateResponse
-from ecourse.settings import MEDIA_URL, STATIC_URL
 from .models import *
 from django.utils.html import mark_safe
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
@@ -26,7 +25,6 @@ class PointInline(admin.TabularInline):
 class LessonAdmin(admin.ModelAdmin):
     list_display = ['id', 'subject', 'created_date', 'courses']
     search_fields = ['subject', 'created_date', 'courses__subject']
-    readonly_fields = ['avatar']
     form = LessonForm       #if not use 'form' django will not apply modelform
     inlines = (LessonTagInline, PointInline)
 
@@ -35,10 +33,6 @@ class LessonAdmin(admin.ModelAdmin):
             'all': ('/static/css/style.css', )
         }
         js = ('/static/js/script.js', )
-
-    def avatar(self, lesson):
-        return mark_safe("<img src='{static_u}{img_url}' alt='{alt}' />"\
-            .format(static_u=MEDIA_URL,img_url=lesson.image.name, alt=lesson.subject))
 
 class LessonInline(admin.TabularInline):
     model = Lesson

@@ -1,11 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
+
 from ckeditor.fields import RichTextField
+from cloudinary.models import  CloudinaryField
+from django.utils import timezone
 
 class User(AbstractUser):
+    email = models.EmailField(unique=True, blank=False, null=False)
     is_mentor = models.BooleanField(default=False, null=False)
     avatar = models.ImageField(upload_to='upload/%Y/%m')
+
+class Token(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=100, default=None)
+    created_date = models.DateTimeField(auto_now_add=True)
+    expired_date = models.DateTimeField(default = timezone.now() + timezone.timedelta(minutes=30))
 
 # Create your models here.
 class Category(models.Model):
