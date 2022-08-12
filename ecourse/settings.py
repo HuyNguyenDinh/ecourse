@@ -92,10 +92,10 @@ WSGI_APPLICATION = 'ecourse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ecourse',
-        'USER': 'postgres',
-        'PASSWORD': '0937461321Huy',
-        'HOST': '127.0.0.1',
+        'NAME': 'ddkjnqne5m1638',
+        'USER': 'bidupbpfmxygor',
+        'PASSWORD': '7d1229376e787926e4baa8611e86f0b48ffff751801c97c7cba7e0ba7c917915',
+        'HOST': 'ec2-44-195-100-240.compute-1.amazonaws.com',
         'PORT': '5432',
     }
 }
