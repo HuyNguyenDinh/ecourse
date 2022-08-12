@@ -91,12 +91,12 @@ WSGI_APPLICATION = 'ecourse.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'ecourse',
-        'USER': 'root',
-        'PASSWORD': '0937461321Huy@',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'USER': 'postgres',
+        'PASSWORD': '0937461321Huy',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
@@ -126,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 USE_I18N = True
 

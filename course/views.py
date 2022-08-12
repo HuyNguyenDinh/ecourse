@@ -14,6 +14,7 @@ from ecourse import settings
 from .perms import *
 from course.utils import random_for_confirm_code
 from django.utils import timezone
+from django.db.models import F
 
 # Create your views here.
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
@@ -27,7 +28,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
     @action(methods=['get'], detail=False, url_path='current-user')
     def current_user(self, request):
-        return Response(self.serializer_class(request.user).data, status=status.HTTP_200_OK)
+        return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
     
     @action(methods=['get'], detail=True, url_path='courses')
     def get_courses_of_user(self, request, pk):
@@ -189,7 +190,6 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
 
 class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):
     queryset = Lesson.objects.filter(active=True)
-    serializer_class = LessonSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = BasePagination
 
@@ -214,7 +214,6 @@ class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         content = request.data.get('content')
         if content:
             c = Comment.objects.create(content=content, lesson=self.get_object(), creator=request.user)
-            
             return Response(CommentSerializer(c).data, status=status.HTTP_201_CREATED)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -249,6 +248,11 @@ class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
         else:
             return Response(ActionSerializer(a, many=True).data, status=status.HTTP_200_OK)
 
+    serializer_class = LessonSerializer
+    # def get_serializer_class(self):
+    #     if self.action == 'add_comment':
+    #         return AddCommentSerializer
+    #     return CommentSerializer
 
 class CommentViewSet(viewsets.ViewSet, generics.DestroyAPIView, generics.UpdateAPIView):
     queryset = Comment.objects.all()

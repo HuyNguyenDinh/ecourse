@@ -46,6 +46,14 @@ class CommentSerializer(ModelSerializer):
         model = Comment
         fields = "__all__"
 
+class AddCommentSerializer(ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["id", "content"]
+        extra_kwargs = {
+            'id': {'read_only': 'true'},
+        }
+
 class LessonSerializer(ModelSerializer):
     tags = TagSerializer(many=True)
     class Meta:

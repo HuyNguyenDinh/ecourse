@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ckeditor.fields import RichTextField
-from cloudinary.models import  CloudinaryField
 from django.utils import timezone
 
 class User(AbstractUser):
