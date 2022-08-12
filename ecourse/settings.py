@@ -15,6 +15,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 import django_heroku
+import os
 
 django_heroku.settings(locals())
 
@@ -146,6 +147,7 @@ EMAIL_PORT = 587
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = '/static/'
 MEDIA_ROOT = "%s/static/media/" % BASE_DIR
 # MEDIA_URL = 'http://localhost:8000/media/'
