@@ -28,7 +28,7 @@ class ItemBase(models.Model):
         abstract = True
     
     subject = models.CharField(max_length=100, null=False)
-    image = models.ImageField(upload_to='courses/%Y/%m', default=None)
+    image = models.ImageField(upload_to='upload/%Y/%m')
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
