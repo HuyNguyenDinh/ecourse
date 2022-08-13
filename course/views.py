@@ -3,7 +3,7 @@ import hashlib
 from django import views
 from django.core.mail import send_mail
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FileUploadParser
 from rest_framework import status, generics, views
 from rest_framework.decorators import action
 from rest_framework import viewsets, permissions
@@ -19,7 +19,7 @@ from django.db.models import F
 # Create your views here.
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
     queryset = User.objects.filter(is_active=True)
-    parser_classes = [MultiPartParser, ]
+    parser_classes = [MultiPartParser, FileUploadParser]
     def get_permissions(self):
         if self.action in ["current_user", "get_courses_of_user"]:
             return [permissions.IsAuthenticated(), ]
@@ -94,12 +94,12 @@ class AuthInfo(views.APIView):
         return Response(settings.OAUTH2_INFO, status=status.HTTP_200_OK)
 
 
-class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateAPIView):
+class CourseViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView):
     queryset = Course.objects.filter(active=True)
     serializer_class = CourseSerializer
     pagination_class = BasePagination
     permission_classes = [permissions.AllowAny]
-    parser_classes = [MultiPartParser, ]
+    parser_classes = [MultiPartParser, FileUploadParser]
 
     def get_queryset(self):
         courses = Course.objects.filter(active=True)
@@ -193,7 +193,7 @@ class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     queryset = Lesson.objects.filter(active=True)
     permission_classes = [permissions.AllowAny]
     pagination_class = BasePagination
-    parser_classes = [MultiPartParser, ]
+    parser_classes = [MultiPartParser, FileUploadParser]
 
     # def get_permissions(self):
     #     if self.action in ["create", "update", "destroy"]:
