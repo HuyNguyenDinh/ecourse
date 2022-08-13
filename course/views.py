@@ -99,6 +99,7 @@ class CourseViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     serializer_class = CourseSerializer
     pagination_class = BasePagination
     permission_classes = [permissions.AllowAny]
+    parser_classes = [MultiPartParser, ]
 
     def get_queryset(self):
         courses = Course.objects.filter(active=True)
@@ -192,6 +193,7 @@ class LessonViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     queryset = Lesson.objects.filter(active=True)
     permission_classes = [permissions.AllowAny]
     pagination_class = BasePagination
+    parser_classes = [MultiPartParser, ]
 
     # def get_permissions(self):
     #     if self.action in ["create", "update", "destroy"]:
